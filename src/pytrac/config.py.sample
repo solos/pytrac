@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+TRAC_USER = ''
+TRAC_PASS = ''
+TRAC_URL = ''
