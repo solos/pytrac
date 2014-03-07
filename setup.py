@@ -10,7 +10,7 @@ from pytrac import __version__
 
 setup(name='pytrac',
       version=__version__,
-      description='A python empty project',
+      description='A client for Trac',
       long_description=open('README.md').read(),
       author='solos',
       author_email='solos@solos.so',
