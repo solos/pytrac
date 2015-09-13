@@ -2,6 +2,17 @@
 # -*- coding:utf-8 -*-
 
 import sys
+
+def mock_config():
+    global TRAC_USER
+    global TRAC_PASS
+    global TRAC_URL
+    TRAC_USER = 'user'
+    TRAC_PASS = 'pass'
+    TRAC_URL = 'url'
+
+sys.modules['config'] = mock_config
+
 sys.path.append('../src/')
 
 from pytrac import Trac
