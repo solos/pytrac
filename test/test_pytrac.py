@@ -25,21 +25,29 @@ class DefaultTestCase(unittest.TestCase):
         self.pytrac = Trac('http://trac_url',
                            'http://trac_url/login',
                            'user', 'password')
+        self.post_patcher = patch("requests.post")
+        self.mock_post = self.post_patcher.start()
+        self.get_patcher = patch("requests.get")
+        self.mock_get = self.get_patcher.start()
+        self.token_match_patcher = patch("pytrac.token_match")
+        self.mock_group = self.token_match_patcher.start()
+
+        # Setting values of default mocks
+        
+        self.mock_group.search.return_value.group.return_value = 'hulahoop'
+        self.mock_post.return_value.content = 'hulahoop'
+        self.mock_get.return_value.content = 'token'
+        self.mock_get.return_value.cookies = 'cookies'
 
     def tearDown(self):
-        pass
+        self.post_patcher.stop()
+        self.get_patcher.stop()
+        self.token_match_patcher.stop()
 
-    @patch("pytrac.token_match")
-    @patch("requests.get")
-    @patch("requests.post")
-    def test_login(self, mock_post, mock_get, mock_group):
-        mock_group.search.return_value.group.return_value = 'hulahoop'
-        mock_get.return_value.content = 'token'
-        mock_get.return_value.cookies = 'cookies'
-        mock_post.return_value.content = 'hulahoop'
+    def test_login(self):
         login_result = self.pytrac.login()
         self.assertEqual(login_result, 'hulahoop')
-        self.assertListEqual(mock_post.call_args_list,
+        self.assertListEqual(self.mock_post.call_args_list,
                              [call('http://trac_url/login',
                                    cookies='cookies',
                                    data={'rememberme': 'password',
@@ -47,19 +55,13 @@ class DefaultTestCase(unittest.TestCase):
                                          'password': 'user',
                                          'user': 'http://trac_url/login'})])
 
-    @patch("pytrac.token_match")
     @patch("pytrac.version_match")
-    @patch("requests.get")
-    @patch("requests.post")
-    def test_create(self, mock_post, mock_get, mock_group2, mock_group):
-        mock_get.return_value.content = 'hulahoop'
-        mock_group.search.return_value.group.return_value = 'hulahoop'
+    def test_create(self, mock_group2):
         mock_group2.search.return_value.group.return_value = 'hulahoop'
-        mock_post.return_value.content = 'hulahoop'
         self.pytrac.cookies['trac_form_token'] = 'cookie'
         create_result = self.pytrac.create('path', 'content', 'comment')
         self.assertEqual(create_result, 'hulahoop')
-        self.assertListEqual(mock_post.call_args_list,
+        self.assertListEqual(self.mock_post.call_args_list,
                              [call('http://trac_url/path?action=edit',
                                    cookies={'trac_form_token': 'cookie'},
                                    data={'comment': 'comment',
@@ -69,6 +71,8 @@ class DefaultTestCase(unittest.TestCase):
                                          'text': 'content', 'from_editor': '1',
                                          'scroll_bar_pos': '36',
                                          '__EDITOR__1': 'textarea'})])
+
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(DefaultTestCase('test_version'))
@@ -76,4 +80,4 @@ def suite():
 
 
 if __name__ == '__main__':
-    unittest.main(defaultTest='suite', verbosity=2)
+    unittest.main(defaultTest='suite', verbosity=3)
