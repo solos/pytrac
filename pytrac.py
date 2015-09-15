@@ -10,6 +10,8 @@ token_match = re.compile(
 version_match = re.compile(
     'name="version" value="(?P<version>\d+)"', re.DOTALL)
 
+__version__ = '0.0.1'
+
 
 class Trac(object):
 
@@ -19,6 +21,7 @@ class Trac(object):
         self.user = user
         self.password = password
         self.rememberme = rememberme
+        self.cookies = {}
 
     def login(self):
         r = requests.get(self.login_url)
